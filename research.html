@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .research-intro {
+      font-size: 17px;
+      color: var(--ink-soft);
+      margin-bottom: 3rem;
+      max-width: 560px;
+    }
+    .res-title {
+      font-size: 18px;
+      font-weight: 500;
+      margin-bottom: 0.4rem;
+    }
+    .res-desc {
+      font-size: 15.5px;
+      color: var(--ink-soft);
+      line-height: 1.75;
+    }
+    @media (max-width: 600px) {
+      .research-intro { font-size: 16px; margin-bottom: 2rem; }
+      .res-title { font-size: 17px; }
+      .res-desc { font-size: 15px; }
+    }
+  </style>
+</head>
+<body>
+
+<nav></nav>
+
+<div class="page">
+  <p class="section-label">Research</p>
+  <p class="research-intro">
+    My work uses molecular dynamics simulation and analytical theory to probe how the crowded cellular environment influences biomolecular processes.
+  </p>
+  <div id="js-research"></div>
+</div>
+
+<footer></footer>
+
+<script src="data.js"></script>
+<script src="layout.js"></script>
+<script>
+  document.getElementById("js-research").innerHTML =
+    SITE.research.map(r => `
+      <div class="divider-item">
+        <span class="res-tag">${r.tag}</span>
+        <div class="res-title">${r.title}</div>
+        <p class="res-desc">${r.desc}</p>
+      </div>
+    `).join("");
+</script>
+</body>
+</html>

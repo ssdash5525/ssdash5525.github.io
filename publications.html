@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .pub-status  { font-family: var(--mono); font-size: 11px; color: var(--ink-muted); letter-spacing: 0.04em; margin-bottom: 0.35rem; }
+    .pub-title   { font-size: 17px; font-weight: 500; margin-bottom: 0.3rem; line-height: 1.45; }
+    .pub-authors { font-family: var(--sans); font-size: 13.5px; color: var(--ink-soft); margin-bottom: 0.25rem; }
+    .pub-authors .self { color: var(--ink); text-decoration: underline; text-underline-offset: 2px; }
+    .pub-journal { font-family: var(--sans); font-size: 13px; color: var(--ink-muted); }
+    .pub-doi a   { color: var(--link); text-decoration: none; font-size: 12px; margin-top: 0.3rem; display: inline-block; }
+    .pub-doi a:hover { text-decoration: underline; }
+    @media (max-width: 600px) {
+      .pub-title { font-size: 16px; }
+      .pub-authors { font-size: 13px; }
+    }
+  </style>
+</head>
+<body>
+
+<nav></nav>
+
+<div class="page">
+  <p class="section-label">Publications</p>
+  <div id="js-pubs"></div>
+</div>
+
+<footer></footer>
+
+<script src="data.js"></script>
+<script src="layout.js"></script>
+<script>
+  document.getElementById("js-pubs").innerHTML =
+    SITE.publications.map(p => {
+      const authors = p.authors.map(a =>
+        a === SITE.name
+          ? `<span class="self">${a}</span>`
+          : a
+      ).join(", ");
+
+      return `
+        <div class="divider-item">
+          <div class="pub-status">${p.status}</div>
+          <div class="pub-title">${p.title}</div>
+          <div class="pub-authors">${authors}</div>
+          <div class="pub-journal">${p.journal}</div>
+          ${p.doi ? `<div class="pub-doi"><a href="${p.doi}" target="_blank">DOI ↗</a></div>` : ""}
+        </div>
+      `;
+    }).join("");
+</script>
+</body>
+</html>

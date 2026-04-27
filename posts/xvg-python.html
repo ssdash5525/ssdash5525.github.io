@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../style.css">
+  <link rel="stylesheet" href="post.css">
+</head>
+<body>
+
+<nav></nav>
+
+<div class="page">
+
+  <div class="post-header">
+    <a href="../blog.html" class="post-back">All notes</a>
+    <div class="post-meta" id="js-post-meta"></div>
+    <h1 class="post-title" id="js-post-title"></h1>
+    <p class="post-subtitle" id="js-post-subtitle"></p>
+  </div>
+
+  <div class="post-body">
+
+    <p>
+      GROMACS writes most analysis output in <code>.xvg</code> format — which is essentially plain text with metadata headers. It looks simple, but in practice people either plot it incorrectly or spend too much time manually cleaning it.
+    </p>
+
+    <p>
+      This note shows a clean, reproducible way to read <code>.xvg</code> files in Python, handle multiple datasets, and produce publication-quality plots without hacks.
+    </p>
+
+    <h2>1. What is inside an <code>.xvg</code> file?</h2>
+
+    <p>A typical <code>.xvg</code> file contains:</p>
+
+    <ul>
+      <li>Comment lines starting with <code>#</code></li>
+      <li>Metadata lines starting with <code>@</code></li>
+      <li>Numerical data columns (time, observable, etc.)</li>
+    </ul>
+
+    <pre><code><span class="comment"># This is a comment</span>
+@    title "RMSD"
+@    xaxis  label "Time (ps)"
+@    yaxis  label "RMSD (nm)"
+0.0   0.12
+1.0   0.15
+2.0   0.14</code></pre>
+
+    <div class="note-box">
+      <strong>Key point:</strong> You must ignore lines starting with <code>#</code> and <code>@</code> when loading data.
+    </div>
+
+    <h2>2. Minimal parser (clean and reliable)</h2>
+
+    <p>The simplest robust approach is to filter metadata lines and load the rest using <code>numpy</code>.</p>
+
+    <pre><code>import numpy as np
+
+def read_xvg(filename):
+    data = []
+    with open(filename) as f:
+        for line in f:
+            if line.startswith(("#", "@")):
+                continue
+            data.append([float(x) for x in line.split()])
+    return np.array(data)</code></pre>
+
+    <p>Usage:</p>
+
+    <pre><code>data = read_xvg("rmsd.xvg")
+time = data[:, 0]
+rmsd = data[:, 1]</code></pre>
+
+    <h2>3. Plotting properly (not the default ugly plot)</h2>
+
+    <p>Most quick plots are unreadable. A few small changes improve clarity significantly.</p>
+
+    <pre><code>import matplotlib.pyplot as plt
+
+plt.figure(figsize=(6,4))
+plt.plot(time, rmsd, linewidth=1.5)
+
+plt.xlabel("Time (ps)")
+plt.ylabel("RMSD (nm)")
+plt.title("RMSD vs Time")
+
+plt.tight_layout()
+plt.show()</code></pre>
+
+    <div class="note-box">
+      <strong>Tip:</strong> Always set axis labels explicitly — do not rely on memory of what the columns mean.
+    </div>
+
+    <h2>4. Handling multiple datasets (very common case)</h2>
+
+    <p>Some GROMACS outputs (e.g. RDF, energy components) contain multiple columns.</p>
+
+    <pre><code>data = read_xvg("rdf.xvg")
+
+r    = data[:, 0]
+g_r1 = data[:, 1]
+g_r2 = data[:, 2]
+
+plt.plot(r, g_r1, label="Dataset 1")
+plt.plot(r, g_r2, label="Dataset 2")
+
+plt.legend()
+plt.xlabel("r (nm)")
+plt.ylabel("g(r)")
+plt.show()</code></pre>
+
+    <h2>5. Smoothing noisy data (optional but useful)</h2>
+
+    <p>MD data is often noisy. A simple moving average helps reveal trends.</p>
+
+    <pre><code>def moving_average(x, window=10):
+    return np.convolve(x, np.ones(window)/window, mode='valid')
+
+smooth_rmsd = moving_average(rmsd, window=20)
+
+plt.plot(time[:len(smooth_rmsd)], smooth_rmsd)
+plt.xlabel("Time (ps)")
+plt.ylabel("RMSD (nm)")
+plt.show()</code></pre>
+
+    <div class="warn-box">
+      <strong>Warning:</strong> Smoothing changes the data. Use it only for visualization, not for quantitative analysis.
+    </div>
+
+    <h2>6. A cleaner alternative (pandas)</h2>
+
+    <p>If you prefer <code>pandas</code>, you can skip manual parsing:</p>
+
+    <pre><code>import pandas as pd
+
+df = pd.read_csv(
+    "rmsd.xvg",
+    comment='@',
+    delim_whitespace=True,
+    header=None
+)
+
+df = df[~df[0].astype(str).str.startswith('#')]
+
+time = df[0].astype(float)
+rmsd = df[1].astype(float)</code></pre>
+
+    <h2>7. What most people do wrong</h2>
+
+    <ul>
+      <li>Plotting without removing metadata → crashes or wrong data</li>
+      <li>Not labeling axes → unusable figures</li>
+      <li>Over-smoothing → misleading trends</li>
+      <li>Copy-pasting data manually → not reproducible</li>
+    </ul>
+
+    <h2>Conclusion</h2>
+
+    <p>
+      The <code>.xvg</code> format is simple, but treating it properly makes your workflow reproducible and your figures publication-ready. Once this pipeline is set up, every new analysis becomes trivial.
+    </p>
+
+  </div><!-- end .post-body -->
+
+  <div class="post-footer">
+    <a href="../blog.html" class="post-back">Back to all notes</a>
+  </div>
+
+</div>
+
+<footer></footer>
+
+<script src="../data.js"></script>
+<script src="../layout.js"></script>
+<script>
+  const thisUrl = "posts/xvg-python.html";
+  const post = SITE.posts.find(p => p.url === thisUrl);
+  if (post) {
+    document.getElementById("js-post-meta").textContent     = post.date;
+    document.getElementById("js-post-title").textContent    = post.title;
+    document.getElementById("js-post-subtitle").textContent = post.excerpt;
+    document.title = `${post.title} — ${SITE.nameShort}`;
+  }
+</script>
+
+</body>
+</html>

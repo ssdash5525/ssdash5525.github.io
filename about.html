@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .about-text p {
+      margin-bottom: 1.2rem;
+      color: var(--ink-soft);
+      font-size: 17px;
+    }
+    .about-text p:last-child { margin-bottom: 0; }
+    .block { margin-bottom: 4rem; }
+    @media (max-width: 600px) {
+      .about-text p { font-size: 16px; }
+      .block { margin-bottom: 3rem; }
+    }
+  </style>
+</head>
+<body>
+
+<nav></nav>
+
+<div class="page">
+
+  <!-- About -->
+  <div class="block">
+    <p class="section-label">About</p>
+    <div class="about-text" id="js-bio"></div>
+  </div>
+
+  <!-- Education -->
+  <div class="block">
+    <p class="section-label">Education</p>
+    <ul id="js-education" style="list-style:none;"></ul>
+  </div>
+
+</div>
+
+<footer></footer>
+
+<script src="data.js"></script>
+<script src="layout.js"></script>
+<script>
+  // Bio
+  document.getElementById("js-bio").innerHTML =
+    SITE.bio.map(p => `<p>${p}</p>`).join("");
+
+  // Education
+  document.getElementById("js-education").innerHTML =
+    SITE.education.map(e => `
+      <li class="row-item">
+        <span class="row-year">${e.years}</span>
+        <div>
+          <div class="row-title">${e.degree}</div>
+          <div class="row-sub">${e.institution}</div>
+          ${e.detail ? `<div class="row-detail">${e.detail}</div>` : ""}
+        </div>
+      </li>
+    `).join("");
+</script>
+</body>
+</html>

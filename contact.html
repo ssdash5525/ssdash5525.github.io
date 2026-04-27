@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .contact-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem 3rem;
+      margin-bottom: 3rem;
+    }
+    .contact-label {
+      font-family: var(--sans);
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+      margin-bottom: 0.3rem;
+    }
+    .contact-value { font-size: 16px; color: var(--ink-soft); }
+    .contact-value a { color: var(--link); text-decoration: none; }
+    .contact-value a:hover { text-decoration: underline; text-underline-offset: 2px; }
+    .contact-note {
+      font-size: 16px;
+      color: var(--ink-muted);
+      font-style: italic;
+      border-left: 2px solid var(--rule);
+      padding-left: 1.2rem;
+    }
+    @media (max-width: 768px) {
+      .contact-grid { grid-template-columns: 1fr 1fr; gap: 1.5rem 2rem; }
+    }
+    @media (max-width: 480px) {
+      .contact-grid { grid-template-columns: 1fr; gap: 1.4rem; }
+      .contact-note { font-size: 15px; }
+    }
+  </style>
+</head>
+<body>
+
+<nav></nav>
+
+<div class="page">
+  <p class="section-label">Contact</p>
+
+  <div class="contact-grid" id="js-contact-grid"></div>
+
+  <p class="contact-note">
+    I am happy to discuss research, collaborate on simulations, or just talk biophysics. The best way to reach me is by email.
+  </p>
+</div>
+
+<footer></footer>
+
+<script src="data.js"></script>
+<script src="layout.js"></script>
+<script>
+  const items = [
+    { label: "Email",        value: `<a href="mailto:${SITE.email}">${SITE.email}</a>` },
+    { label: "Office",       value: `${SITE.department}<br>${SITE.institute}<br>Odisha 769008` },
+    { label: "GitHub",       value: SITE.github   ? `<a href="${SITE.github}" target="_blank">${SITE.github.replace("https://","")}</a>` : "—" },
+    { label: "Google Scholar", value: SITE.scholar ? `<a href="${SITE.scholar}" target="_blank">Profile ↗</a>` : "—" },
+    { label: "ORCID",        value: SITE.orcid    ? `<a href="${SITE.orcid}" target="_blank">${SITE.orcid.replace("https://orcid.org/","")}</a>` : "—" },
+    { label: "LinkedIn",     value: SITE.linkedin ? `<a href="${SITE.linkedin}" target="_blank">Profile ↗</a>` : "—" },
+  ].filter(i => i.value !== "—");
+
+  document.getElementById("js-contact-grid").innerHTML =
+    items.map(i => `
+      <div>
+        <div class="contact-label">${i.label}</div>
+        <div class="contact-value">${i.value}</div>
+      </div>
+    `).join("");
+</script>
+</body>
+</html>

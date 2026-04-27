@@ -1,0 +1,213 @@
+/* ============================================================
+   post.css — shared styles for all blog post pages
+   Linked from posts/*.html via  <link rel="stylesheet" href="../post.css">
+   ============================================================ */
+
+.post-header {
+  padding-top: 4rem;
+  padding-bottom: 2.5rem;
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: 3rem;
+}
+
+.post-back {
+  font-family: var(--sans);
+  font-size: 13px;
+  color: var(--ink-muted);
+  text-decoration: none;
+  letter-spacing: 0.02em;
+  display: inline-block;
+  margin-bottom: 2rem;
+  transition: color 0.15s;
+}
+.post-back:hover      { color: var(--ink); }
+.post-back::before    { content: "← "; }
+
+.post-meta {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--ink-muted);
+  margin-bottom: 1rem;
+  letter-spacing: 0.04em;
+}
+
+.post-title {
+  font-family: var(--serif);
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  margin-bottom: 1rem;
+}
+
+.post-subtitle {
+  font-size: 17px;
+  color: var(--ink-soft);
+  font-style: italic;
+  max-width: 540px;
+  line-height: 1.7;
+}
+
+/* ── Body text ────────────────────────────────────────────── */
+.post-body { max-width: 680px; width: 100%; }
+
+.post-body p {
+  font-size: 17px;
+  color: var(--ink-soft);
+  margin-bottom: 1.4rem;
+  line-height: 1.85;
+}
+
+.post-body h2 {
+  font-family: var(--serif);
+  font-size: 1.35rem;
+  font-weight: 500;
+  color: var(--ink);
+  margin: 2.8rem 0 0.8rem;
+  letter-spacing: -0.01em;
+}
+
+.post-body h3 {
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  margin: 2rem 0 0.6rem;
+}
+
+.post-body a {
+  color: var(--link);
+  text-underline-offset: 2px;
+}
+
+.post-body strong { color: var(--ink); font-weight: 500; }
+
+.post-body ul,
+.post-body ol {
+  padding-left: 1.4rem;
+  margin-bottom: 1.4rem;
+  color: var(--ink-soft);
+  font-size: 17px;
+  line-height: 1.85;
+}
+.post-body li { margin-bottom: 0.5rem; }
+
+/* ── Inline code ──────────────────────────────────────────── */
+.post-body code {
+  font-family: var(--mono);
+  font-size: 13.5px;
+  background: var(--paper-warm);
+  border: 1px solid var(--rule);
+  padding: 1px 5px;
+  border-radius: 3px;
+  color: var(--ink);
+}
+
+/* ── Code blocks ──────────────────────────────────────────── */
+.post-body pre {
+  background: #1e1e1c;
+  border: 1px solid #333;
+  border-radius: 5px;
+  padding: 1.2rem 1.4rem;
+  overflow-x: auto;
+  margin: 1rem 0 1.8rem;
+  position: relative;
+}
+.post-body pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 13px;
+  line-height: 1.75;
+  color: #d4d0c8;
+}
+.post-body pre .comment { color: #7a7a72; }
+.post-body pre .prompt  { color: #7a9f6e; user-select: none; }
+
+/* ── Step label ───────────────────────────────────────────── */
+.step-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: var(--accent-bg);
+  padding: 3px 10px;
+  border-radius: 2px;
+  margin-bottom: 0.6rem;
+}
+
+/* ── Note / warning boxes ─────────────────────────────────── */
+.note-box {
+  border-left: 3px solid var(--accent);
+  background: var(--accent-bg);
+  padding: 0.9rem 1.2rem;
+  border-radius: 0 4px 4px 0;
+  margin: 1.6rem 0;
+  font-size: 15.5px;
+  color: var(--ink-soft);
+  line-height: 1.7;
+}
+.note-box strong { color: var(--accent); }
+
+.warn-box {
+  border-left: 3px solid #b85c00;
+  background: #fdf3e8;
+  padding: 0.9rem 1.2rem;
+  border-radius: 0 4px 4px 0;
+  margin: 1.6rem 0;
+  font-size: 15.5px;
+  color: #5a3a10;
+  line-height: 1.7;
+}
+.warn-box strong { color: #b85c00; }
+
+/* ── References list ──────────────────────────────────────── */
+.ref-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.ref-list li {
+  font-family: var(--sans);
+  font-size: 14px;
+  color: var(--ink-muted);
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--rule);
+  display: flex;
+  gap: 0.6rem;
+  align-items: baseline;
+}
+.ref-list li:last-child { border-bottom: none; }
+.ref-list a             { color: var(--link); text-decoration: none; }
+.ref-list a:hover       { text-decoration: underline; }
+.ref-num {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-muted);
+  flex-shrink: 0;
+}
+
+/* ── Post footer ──────────────────────────────────────────── */
+.post-footer {
+  margin-top: 4rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--rule);
+}
+
+/* ── Responsive ───────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .post-header                        { padding-top: 2.5rem; }
+  .post-body p,
+  .post-body ul,
+  .post-body ol                       { font-size: 16px; }
+  .post-body pre                      { padding: 0.9rem 1rem; }
+  .post-body pre code                 { font-size: 12px; }
+  .note-box, .warn-box                { font-size: 14.5px; }
+  .step-label                         { font-size: 10px; }
+}

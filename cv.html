@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    #hero {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 2rem;
+      align-items: center;
+      margin-bottom: 2rem;
+    }
+    /* Avatar is first in DOM (for mobile float), but goes right on desktop */
+    #hero .avatar    { order: 2; }
+    #hero .hero-text { order: 1; }
+    .cv-block { margin-bottom: 3rem; }
+    .cv-heading {
+      font-family: var(--sans);
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+      border-bottom: 1px solid var(--rule);
+      padding-bottom: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    .cv-row { display: grid; grid-template-columns: 110px 1fr; gap: 0.4rem 1.5rem; margin-bottom: 1rem; font-size: 15.5px; }
+    .cv-year { font-family: var(--mono); font-size: 12px; color: var(--ink-muted); padding-top: 2px; }
+    .cv-content { color: var(--ink-soft); }
+    .cv-content strong { color: var(--ink); font-weight: 500; }
+    .cv-empty { font-family: var(--sans); font-size: 14px; color: var(--ink-muted); font-style: italic; }
+    .avatar {
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      background: var(--paper-warm);
+      border: 1px solid var(--rule);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--serif);
+      font-size: 2rem;
+      color: var(--ink-muted);
+      font-style: italic;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+    .avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .contact-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem 2.5rem;
+    }
+    .contact-label {
+      font-family: var(--sans);
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+    }
+    .contact-value {
+      font-size: 15px;
+      color: var(--ink-soft);
+    }
+    .contact-value a {
+      color: var(--link);
+      text-decoration: none;
+    }
+    /* contact inline strip — wraps on mobile */
+    .contact-inline {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.3rem 0;
+      font-size: 14px;
+      color: var(--ink-soft);
+      line-height: 1.9;
+    }
+    .contact-item { white-space: nowrap; }
+    .sep { color: var(--ink-muted); padding: 0 0.4rem; }
+    @media (max-width: 768px) {
+      .cv-row { grid-template-columns: 90px 1fr; }
+    }
+    @media (max-width: 600px) {
+      #hero { display: block; margin-bottom: 1.5rem; }
+      #hero .avatar {
+        float: right;
+        margin: 0.2rem 0 0.8rem 1.2rem;
+        width: 72px;
+        height: 72px;
+        font-size: 1.4rem;
+      }
+      #hero::after { content: ""; display: table; clear: both; }
+      .cv-row { grid-template-columns: 1fr; gap: 0.1rem; }
+      .cv-year { padding-bottom: 0.1rem; }
+      .contact-grid { grid-template-columns: 1fr; }
+      .sep { display: none; }
+      .contact-inline { flex-direction: column; gap: 0.2rem; }
+      .contact-item { white-space: normal; }
+    }
+    .ref-row {
+      grid-template-columns: 1fr;  /* remove left column */
+    }
+  </style>
+</head>
+<body>
+
+<nav></nav>
+
+<div class="page">
+  <!-- Hero (same as homepage) -->
+  <section id="hero">
+    <div class="avatar" id="js-avatar"></div>
+    <div class="hero-text">
+      <h1 class="hero-name" id="js-name"></h1>
+      <p class="hero-role" id="js-role"></p>
+    </div>
+  </section>
+
+  <div class="cv-block">
+    <div class="cv-heading">Contact</div>
+    <div id="js-cv-contact"></div>
+  </div>
+
+  <p class="section-label">Curriculum Vitae</p>
+
+  <!-- Objective -->
+  <div class="cv-block">
+    <div class="cv-heading">Objective</div>
+    <div id="js-cv-objective"></div>
+  </div>
+
+  <!-- Research Experience -->
+  <div class="cv-block">
+    <div class="cv-heading">Research Experience</div>
+    <div id="js-cv-exp"></div>
+  </div>
+
+  <!-- Teaching -->
+  <div class="cv-block">
+    <div class="cv-heading">Teaching</div>
+    <div id="js-cv-teach"></div>
+  </div>
+
+  <!-- Education (pulled from shared data) -->
+  <div class="cv-block">
+    <div class="cv-heading">Education</div>
+    <div id="js-cv-edu"></div>
+  </div>
+
+  <!-- Skills -->
+  <div class="cv-block">
+    <div class="cv-heading">Skills &amp; Tools</div>
+    <div class="skills-grid" id="js-skills"></div>
+  </div>
+
+  <!-- Conferences -->
+  <div class="cv-block">
+    <div class="cv-heading">Conferences &amp; Talks</div>
+    <div id="js-cv-conf"></div>
+  </div>
+
+  <!-- Interests -->
+  <div class="cv-block">
+    <div class="cv-heading">Interests</div>
+    <div class="skills-grid" id="js-cv-int"></div>
+  </div>
+
+  <!-- Awards -->
+  <div class="cv-block">
+    <div class="cv-heading">Awards</div>
+    <div id="js-cv-awards"></div>
+  </div>
+
+  <!-- References -->
+  <div class="cv-block">
+    <div class="cv-heading">References</div>
+    <div id="js-cv-ref"></div>
+  </div>
+
+  <!-- Download -->
+  <a href="" id="js-cv-dl" class="btn btn-secondary">Download full CV (PDF)</a>
+
+</div>
+
+<footer></footer>
+
+<script src="data.js"></script>
+<script src="layout.js"></script>
+<script>
+  function renderRows(items, container) {
+    if (!container) return;
+
+    if (!items || items.length === 0) {
+      container.innerHTML = `<p class="cv-empty">To be added.</p>`;
+      return;
+    }
+
+    // Case 1: string (Objective)
+    if (typeof items === "string") {
+      container.innerHTML = `<p class="cv-content">${items}</p>`;
+      return;
+    }
+
+    // Case 2: array of strings (Interests)
+    if (typeof items[0] === "string") {
+      container.innerHTML = items.map(i => `
+        <div class="cv-row">
+          <div class="cv-content">${i}</div>
+        </div>
+      `).join("");
+      return;
+    }
+
+    // Default case (your existing structure)
+    container.innerHTML = items.map(i => `
+      <div class="cv-row">
+        <span class="cv-year">${i.years || ""}</span>
+        <div class="cv-content">
+          <strong>${i.title || ""}</strong>${i.org ? `, ${i.org}` : ""}<br>
+          <i>${i.desc || i.event || ""}</i>
+        </div>
+      </div>
+    `).join("");
+  }
+
+  function renderReferences(items, container) {
+    if (!container) return;
+  
+    if (!items || items.length === 0) {
+      container.innerHTML = `<p class="cv-empty">Available upon request.</p>`;
+      return;
+    }
+  
+    container.innerHTML = items
+      .filter(r => r.name)
+      .map(r => `
+        <div class="cv-row ref-row">
+          <div class="cv-content">
+            <strong>${r.name}</strong><br>
+            ${r.role || ""}${r.org ? `, ${r.org}` : ""}<br>
+            ${r.email ? `<span style="font-size:13px;color:var(--ink-muted)">${r.email}</span>` : ""}
+          </div>
+        </div>
+      `).join("");
+  }
+
+  document.getElementById("js-name").textContent     = SITE.name;
+  document.getElementById("js-role").textContent     = `${SITE.role} · ${SITE.department} · ${SITE.institute}`;
+  // Avatar: photo or initials
+  const av = document.getElementById("js-avatar");
+  if (SITE.photo) {
+    av.innerHTML = `<img src="${SITE.photo}" alt="${SITE.name}">`;
+  } else {
+    av.textContent = SITE.initials;
+  }
+
+  const contactItems = [
+    { label: "Email", value: `<a href="mailto:${SITE.email}">${SITE.email}</a>` },
+    { label: "Office", value: `${SITE.department}, ${SITE.institute}, Odisha 769008` },
+    { label: "GitHub", value: SITE.github ? `<a href="${SITE.github}" target="_blank">${SITE.github.replace("https://","")}</a>` : "—" },
+    { 
+      label: "Google Scholar", 
+      value: SITE.scholar 
+        ? `<a href="${SITE.scholar}" target="_blank">${SITE.scholar.replace("https://","")}</a>` 
+        : "—" 
+    },
+    { label: "ORCID", value: SITE.orcid ? `<a href="${SITE.orcid}" target="_blank">${SITE.orcid.replace("https://orcid.org/","")}</a>` : "—" },
+    { 
+      label: "LinkedIn", 
+      value: SITE.linkedin 
+        ? `<a href="${SITE.linkedin}" target="_blank">${SITE.linkedin.replace("https://","")}</a>` 
+        : "—" 
+    }
+  ].filter(i => i.value !== "—");
+
+  document.getElementById("js-cv-contact").innerHTML = `
+    <div class="cv-content contact-inline">
+      ${contactItems.map(i => `
+        <span class="contact-item">
+          <span class="contact-label">${i.label}:</span>
+          <span class="contact-value">${i.value}</span>
+        </span>
+      `).join('<span class="sep"> | </span>')}
+    </div>
+  `;
+
+  renderRows(SITE.cvObjective, document.getElementById("js-cv-objective"));
+
+  renderRows(SITE.cvExperience, document.getElementById("js-cv-exp"));
+  renderRows(SITE.cvTeaching,   document.getElementById("js-cv-teach"));
+
+  // Education reused
+  document.getElementById("js-cv-edu").innerHTML =
+    SITE.education.map(e => `
+      <div class="cv-row">
+        <span class="cv-year">${e.years}</span>
+        <div class="cv-content">
+          <strong>${e.degree}</strong><br>
+          ${e.institution}${e.detail ? `<br><span style="font-size:13px;color:var(--ink-muted)">${e.detail}</span>` : ""}
+        </div>
+      </div>
+    `).join("");
+
+  // Skills
+  document.getElementById("js-skills").innerHTML =
+    SITE.skills.map(s => `<span class="skill-tag">${s}</span>`).join("");
+
+  // Conferences
+  const confEl = document.getElementById("js-cv-conf");
+  if (SITE.cvConferences && SITE.cvConferences.length > 0) {
+    renderRows(SITE.cvConferences, confEl);
+  } else {
+    confEl.innerHTML = `<p class="cv-empty">To be added.</p>`;
+  }
+
+  document.getElementById("js-cv-int").innerHTML =
+    SITE.cvInterests.map(i => `<span class="skill-tag">${i}</span>`).join("");
+  
+  renderRows(SITE.cvAwards,   document.getElementById("js-cv-awards"));
+
+  renderReferences(SITE.cvReferences, document.getElementById("js-cv-ref"));
+
+  // PDF link
+  const dlBtn = document.getElementById("js-cv-dl");
+  // dlBtn.removeAttribute("href");
+  dlBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    window.print();
+  });
+</script>
+</body>
+</html>

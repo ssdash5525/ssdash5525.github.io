@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../style.css">
+  <link rel="stylesheet" href="post.css">
+</head>
+<body>
+
+<nav></nav>
+
+<div class="page">
+
+  <div class="post-header">
+    <a href="../blog.html" class="post-back">All notes</a>
+    <div class="post-meta" id="js-post-meta"></div>
+    <h1 class="post-title" id="js-post-title"></h1>
+    <p class="post-subtitle" id="js-post-subtitle"></p>
+  </div>
+
+  <div class="post-body">
+
+    <p>
+      This is a consolidated installation guide for building GROMACS 2024.5 patched with PLUMED 2.9.3 on the KALAM cluster, including a fix for the MPI rank error that arises when the system defaults to MPICH instead of OpenMPI.
+    </p>
+
+    <h2>1. Extract the source archives</h2>
+
+    <p>Download <code>plumed-2.9.3.tgz</code> and <code>gromacs-2024.5.tar.gz</code>, then extract both:</p>
+
+    <pre><code>tar -xvzf plumed-2.9.3.tgz
+tar -xvzf gromacs-2024.5.tar.gz</code></pre>
+
+    <h2>2. Install PLUMED</h2>
+
+    <pre><code><span class="comment"># Enter the PLUMED source directory</span>
+cd /path/to/plumed-2.9.3
+
+./configure \
+  --prefix="/home/mb/softies/plumed293" \
+  --enable-mpi \
+  --disable-almost \
+  --enable-matheval \
+  CXX=mpiCC
+
+make -j 32 && make install</code></pre>
+
+    <div class="note-box">
+      <strong>Note:</strong> <code>--enable-matheval</code> requires <code>libmatheval</code> to be available on the system. If the configure step fails on this flag, see reference [3] below for a workaround.
+    </div>
+
+    <h2>3. Install GROMACS with PLUMED patch</h2>
+
+    <h3>3a — Patch GROMACS</h3>
+
+    <p>Source the PLUMED environment and apply the patch before running CMake. If GROMACS 2024.5 is not listed as a supported version, choose the nearest available version when prompted.</p>
+
+    <pre><code>export PLUMED_ROOT="/home/mb/softies/src/plumed-2.9.3"
+source $PLUMED_ROOT/sourceme.sh
+
+cd /path/to/gromacs-2024.5
+$PLUMED_ROOT/src/lib/plumed patch -p
+<span class="comment"># Select the nearest GROMACS version if 2024.5 is not listed</span></code></pre>
+
+    <h3>3b — Configure and build</h3>
+
+    <pre><code>mkdir build && cd build
+
+cmake .. \
+  -DGMX_BUILD_OWN_FFTW=ON \
+  -DGMX_GPU=CUDA \
+  -DCMAKE_INSTALL_PREFIX=/home/mb/softies/gro2024_cuda_plumed_mpi \
+  -DGMX_THREAD_MPI=OFF \
+  -DGMX_MPI=ON \
+  -DCMAKE_C_COMPILER=/usr/bin/gcc-12 \
+  -DCMAKE_CXX_COMPILER=/usr/bin/g++-12
+
+make -j 32 && make install</code></pre>
+
+    <h2>4. Verify MPI and OpenMP linkage</h2>
+
+    <p>
+      Check that both binaries are linked against OpenMP and MPI libraries. You are looking for <code>libgomp.so.1</code> (OpenMP) and <code>libmpich.so.12</code> or <code>libmpi.so</code> (MPI) in the output.
+    </p>
+
+    <pre><code>ldd ~/softies/plumed293/bin/plumed
+ldd ~/softies/gro2024_cuda_plumed_mpi/bin/gmx_mpi</code></pre>
+
+    <h2>5. Fixing the MPI rank error on KALAM</h2>
+
+    <p>
+      KALAM may default to MPICH for <code>mpirun</code> and <code>mpiexec</code>. MPICH requires more than one physical node to launch, so single-node jobs fail. The fix is to switch the system default to OpenMPI.
+    </p>
+
+    <h3>5a — Diagnose</h3>
+
+    <p>Check which MPI implementation is currently active:</p>
+
+    <pre><code>update-alternatives --get-selections | grep mpi</code></pre>
+
+    <p>If the output shows <code>mpich</code> entries like the following, you need to switch:</p>
+
+    <pre><code><span class="comment"># Bad — linked to MPICH</span>
+mpi                   auto   /usr/bin/mpicc.mpich
+mpirun                auto   /usr/bin/mpirun.mpich
+mpi-x86_64-linux-gnu  auto   /usr/include/x86_64-linux-gnu/mpich</code></pre>
+
+    <h3>5b — Reinstall OpenMPI</h3>
+
+    <pre><code>sudo apt-get install --reinstall openmpi-bin</code></pre>
+
+    <h3>5c — Confirm the switch</h3>
+
+    <pre><code>update-alternatives --get-selections | grep mpi</code></pre>
+
+    <p>The output should now point to <code>openmpi</code>:</p>
+
+    <pre><code><span class="comment"># Good — linked to OpenMPI</span>
+mpi                   auto   /usr/bin/mpicc.openmpi
+mpirun                auto   /usr/bin/mpirun.openmpi
+mpi-x86_64-linux-gnu  auto   /usr/include/x86_64-linux-gnu/mpich</code></pre>
+
+    <div class="warn-box">
+      <strong>Note:</strong> The header path (<code>mpi-x86_64-linux-gnu</code>) may still show the MPICH include path even after switching — this is normal and does not affect runtime behaviour.
+    </div>
+
+    <h2>6. Running GROMACS with PLUMED</h2>
+
+    <p>Once OpenMPI is the active default, launch an MD run with PLUMED as follows:</p>
+
+    <pre><code>mpiexec -np 2 --oversubscribe gmx_mpi mdrun -plumed plumed.dat</code></pre>
+
+    <div class="note-box">
+      <strong>Tip:</strong> Adjust <code>-np 2</code> to the number of MPI ranks appropriate for your job. The <code>--oversubscribe</code> flag allows ranks to exceed physical cores — useful for testing but not recommended for production runs.
+    </div>
+
+    <h2>References</h2>
+
+    <ul class="ref-list">
+      <li>
+        <span class="ref-num">[1]</span>
+        <a href="https://groups.google.com/forum/#!topic/plumed-users/stlK9-kaa6A" target="_blank">PLUMED Users Group — installation discussion</a>
+      </li>
+      <li>
+        <span class="ref-num">[2]</span>
+        <a href="https://www.archer.ac.uk/documentation/software/plumed/" target="_blank">Archer Documentation on PLUMED</a>
+      </li>
+      <li>
+        <span class="ref-num">[3]</span>
+        <a href="https://groups.google.com/forum/#!topic/plumed-users/BE3abBvsPOE" target="_blank">Google Groups — libmatheval setup</a>
+      </li>
+    </ul>
+
+  </div><!-- end .post-body -->
+
+  <div class="post-footer">
+    <a href="../blog.html" class="post-back">Back to all notes</a>
+  </div>
+
+</div>
+
+<footer></footer>
+
+<script src="../data.js"></script>
+<script src="../layout.js"></script>
+<script>
+  const thisUrl = "posts/gromacs-plumed-installation.html";
+  const post = SITE.posts.find(p => p.url === thisUrl);
+  if (post) {
+    document.getElementById("js-post-meta").textContent     = post.date;
+    document.getElementById("js-post-title").textContent    = post.title;
+    document.getElementById("js-post-subtitle").textContent = post.excerpt;
+    document.title = `${post.title} — ${SITE.nameShort}`;
+  }
+</script>
+
+</body>
+</html>

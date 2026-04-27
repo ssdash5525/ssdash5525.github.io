@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+
+    /* ── Filter tabs (same as gallery) ─────────────────────── */
+    .filter-bar {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 2.5rem;
+      flex-wrap: wrap;
+    }
+    .filter-btn {
+      font-family: var(--sans);
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 6px 16px;
+      border-radius: 2px;
+      border: 1px solid var(--rule);
+      background: transparent;
+      color: var(--ink-muted);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .filter-btn:hover  { color: var(--ink); border-color: var(--ink-muted); }
+    .filter-btn.active { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+
+    /* ── Post list ──────────────────────────────────────────── */
+    .post-link {
+      display: grid;
+      grid-template-columns: 90px 1fr;
+      gap: 0 1.5rem;
+      padding: 1.4rem 0;
+      border-bottom: 1px solid var(--rule);
+      text-decoration: none;
+      color: inherit;
+      transition: opacity 0.15s;
+    }
+    .post-link:last-child { border-bottom: none; }
+    .post-link:hover      { opacity: 0.7; }
+
+    .post-date    { font-family: var(--mono); font-size: 12px; color: var(--ink-muted); padding-top: 3px; }
+    .post-title   { font-size: 17px; font-weight: 500; margin-bottom: 0.2rem; }
+    .post-excerpt { font-family: var(--sans); font-size: 13.5px; color: var(--ink-soft); }
+
+    .post-tag {
+      display: inline-block;
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      border: 1px solid var(--rule);
+      border-radius: 2px;
+      padding: 1px 6px;
+      margin-right: 0.4rem;
+      margin-bottom: 0.35rem;
+      color: var(--ink-muted);
+    }
+    .post-soon {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--ink-muted);
+      letter-spacing: 0.06em;
+      margin-left: 0.5rem;
+      vertical-align: middle;
+    }
+
+    /* hidden by filter */
+    .post-link.hidden { display: none; }
+
+    /* empty state */
+    .posts-empty {
+      font-family: var(--sans);
+      font-size: 14px;
+      color: var(--ink-muted);
+      font-style: italic;
+      padding: 2rem 0;
+    }
+
+    @media (max-width: 600px) {
+      .post-link { grid-template-columns: 1fr; gap: 0.25rem; }
+      .post-date  { padding-top: 0; margin-bottom: 0.1rem; }
+      .post-title { font-size: 16px; }
+      .filter-btn { font-size: 11px; padding: 5px 12px; }
+    }
+  </style>
+</head>
+<body>
+
+<nav></nav>
+
+<div class="page">
+  <p class="section-label">Notes &amp; Writing</p>
+
+  <!-- Filter bar — built by JS -->
+  <div class="filter-bar" id="js-filter-bar"></div>
+
+  <!-- Post list -->
+  <div id="js-posts"></div>
+</div>
+
+<footer></footer>
+
+<script src="data.js"></script>
+<script src="layout.js"></script>
+<script>
+  // ── Sort posts: pinned first, then newest → oldest ───────
+  const posts = (SITE.posts || []).slice().sort((a, b) => {
+    if (a.pinned && !b.pinned) return -1;
+    if (!a.pinned && b.pinned) return  1;
+    if (!a.date && !b.date)    return  0;
+    if (!a.date) return -1;
+    if (!b.date) return  1;
+    return new Date(b.date) - new Date(a.date);
+  });
+
+  const filterEl = document.getElementById("js-filter-bar");
+  const postsEl  = document.getElementById("js-posts");
+
+  // ── Collect tags from all posts ──────────────────────────
+  // Each post can have a `tags` array, e.g. tags: ["Science", "Life"]
+  // or a single `tag` string for backwards-compat.
+  const allTags = new Set();
+  posts.forEach(p => {
+    const t = p.tags || (p.tag ? [p.tag] : []);
+    t.forEach(tag => allTags.add(tag));
+  });
+
+  // Build ordered tag list — alphabetical, "All" at the end
+  const orderedTags = ["All", ...[...allTags].sort()];
+
+  // ── Filter buttons ───────────────────────────────────────
+  if (orderedTags.length > 1) {   // only show bar if there are actual tags
+    filterEl.innerHTML = orderedTags.map((tag, i) => `
+      <button class="filter-btn${i === 0 ? " active" : ""}" data-tag="${tag}">${tag}</button>
+    `).join("");
+  }
+
+  let activeTag = orderedTags[0];
+
+  // ── Render posts ─────────────────────────────────────────
+  function renderPosts() {
+    if (!posts.length) {
+      postsEl.innerHTML = `<p class="posts-empty">No posts yet — check back soon.</p>`;
+      return;
+    }
+
+    postsEl.innerHTML = posts.map((p, idx) => {
+      const isLive   = p.url && p.url !== "#";
+      const tags     = p.tags || (p.tag ? [p.tag] : []);
+      const tagStr   = tags.map(t => `<span class="post-tag">${t}</span>`).join("");
+
+      // Determine initial visibility
+      const visible  = activeTag === "All" || tags.includes(activeTag);
+
+      return `
+        <a href="${isLive ? p.url : "javascript:void(0)"}"
+           class="post-link${isLive ? "" : " post-draft"}${visible ? "" : " hidden"}"
+           data-tags="${tags.join(",")}"
+           ${isLive ? "" : 'style="cursor:default;opacity:0.45;"'}>
+          <span class="post-date">${p.date || ""}</span>
+          <div>
+            ${tagStr ? `<div style="margin-bottom:0.3rem">${tagStr}</div>` : ""}
+            <div class="post-title">${p.title}${isLive ? "" : ' <span class="post-soon">coming soon</span>'}</div>
+            <div class="post-excerpt">${p.excerpt || ""}</div>
+          </div>
+        </a>
+      `;
+    }).join("");
+  }
+
+  renderPosts();
+
+  // ── Filter logic ─────────────────────────────────────────
+  filterEl.addEventListener("click", e => {
+    const btn = e.target.closest(".filter-btn");
+    if (!btn) return;
+
+    activeTag = btn.dataset.tag;
+    filterEl.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+
+    postsEl.querySelectorAll(".post-link").forEach(el => {
+      const tags  = el.dataset.tags ? el.dataset.tags.split(",") : [];
+      const match = activeTag === "All" || tags.includes(activeTag);
+      el.classList.toggle("hidden", !match);
+    });
+
+    // Show empty state if nothing visible
+    const anyVisible = [...postsEl.querySelectorAll(".post-link:not(.hidden)")].length > 0;
+    let emptyEl = postsEl.querySelector(".posts-empty");
+    if (!anyVisible && !emptyEl) {
+      postsEl.insertAdjacentHTML("beforeend", `<p class="posts-empty">No posts in this category yet.</p>`);
+    } else if (anyVisible && emptyEl) {
+      emptyEl.remove();
+    }
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../style.css">
+  <link rel="stylesheet" href="../post.css">  <!-- shared post styles live here -->
+</head>
+<body>
+
+<nav></nav>
+
+<div class="page">
+
+  <div class="post-header">
+    <a href="../blog.html" class="post-back">All notes</a>
+    <div class="post-meta" id="js-post-meta"></div>
+    <h1 class="post-title" id="js-post-title"></h1>
+    <p class="post-subtitle" id="js-post-subtitle"></p>
+  </div>
+
+  <div class="post-body">
+
+    <!-- ═══════════════════════════════════════════════════
+         YOUR CONTENT GOES HERE
+         Available components:
+
+         Headings:
+           <h2>Section title</h2>
+           <h3>Sub-label (renders as small-caps uppercase)</h3>
+
+         Code block:
+           <pre><code>your code here</code></pre>
+
+         Inline code:
+           <code>some_function()</code>
+
+         Note box (blue/accent):
+           <div class="note-box"><strong>Note:</strong> text here</div>
+
+         Warning box (amber):
+           <div class="warn-box"><strong>Warning:</strong> text here</div>
+
+         Step label:
+           <div class="step-label">Step 1</div>
+
+         References list:
+           <ul class="ref-list">
+             <li><span class="ref-num">[1]</span> <a href="#">Title</a></li>
+           </ul>
+    ════════════════════════════════════════════════════ -->
+
+    <p>
+      Introduction paragraph goes here.
+    </p>
+
+    <h2>1. First section</h2>
+
+    <p>Body text here.</p>
+
+  </div><!-- end .post-body -->
+
+  <div class="post-footer">
+    <a href="../blog.html" class="post-back">Back to all notes</a>
+  </div>
+
+</div>
+
+<footer></footer>
+
+<script src="../data.js"></script>
+<script src="../layout.js"></script>
+<script>
+  // ── Change this to match the url field in data.js ──────
+  const thisUrl = "posts/YOUR-SLUG-HERE.html";
+
+  const post = SITE.posts.find(p => p.url === thisUrl);
+  if (post) {
+    document.getElementById("js-post-meta").textContent     = post.date;
+    document.getElementById("js-post-title").textContent    = post.title;
+    document.getElementById("js-post-subtitle").textContent = post.excerpt;
+    document.title = `${post.title} — ${SITE.nameShort}`;
+  }
+</script>
+
+</body>
+</html>
