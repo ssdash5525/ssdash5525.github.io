@@ -90,7 +90,7 @@ const SITE = {
 
   // ── CV — Academic Profile ─────────────────────────────────
   // 3–4 sentences. Edit freely — this is your voice.
-  cvObjective: "I am a physicist turned biophysicist, interested in how the physical principles of crowding, confinement, and diffusion govern protein behaviour inside the cell. My PhD work combines coarse-grained molecular dynamics simulation with analytical theory to characterise protein-protein association kinetics under macromolecular crowding. I aim to bridge the gap between simplified in vitro models and the genuinely dense, heterogeneous environment of the living cell.",
+  cvObjective: "I am a computational biophysicis research scholar, interested in the physical principles of crowding, confinement, and diffusion that govern protein behaviour inside the cell. My PhD work combines coarse-grained molecular dynamics simulation with analytical theory to characterise protein-protein association kinetics under macromolecular crowding. I aim to bridge the gap between simplified in vitro models and the genuinely dense, heterogeneous environment of the living cell.",
  
   // ── CV — Research Interests ──────────────────────────────
   // Short keyword phrases — 4 to 6 is ideal.
